@@ -9,40 +9,64 @@
 
 #import "Interfaces.h"
 
-static FLEXManager *manager = nil;
+static BOOL initialized = NO;
+static id manager = nil;
 static SEL show = nil;
+
+static id (*FLXGetManager)();
+static SEL (*FLXRevealSEL)();
+static Class (*FLXWindowClass)();
 
 %ctor {
     NSString *standardPath = @"/Library/MobileSubstrate/DynamicLibraries/libFLEX.dylib";
     NSFileManager *disk = NSFileManager.defaultManager;
+    void *handle = nil;
+
     if ([disk fileExistsAtPath:standardPath]) {
-        dlopen(standardPath.UTF8String, RTLD_LAZY);
-        manager = [NSClassFromString(@"FLEXManager") sharedManager];
-        show = @selector(showExplorer);
+        handle = dlopen(standardPath.UTF8String, RTLD_LAZY);
     } else {
         // Load tweak from "alternate" location
         // ...
-        manager = [NSClassFromString(???) ???];
-        show = ???;
     }
+
+    if (handle) {
+        FLXGetManager = (id(*)())dlsym(handle, "FLXGetManager");
+        FLXRevealSEL = (SEL(*)())dlsym(handle, "FLXRevealSEL");
+        FLXWindowClass = (Class(*)())dlsym(handle, "FLXWindowClass");
+
+        manager = FLXGetManager();
+        show = FLXRevealSEL();
+        initialized = YES;
+    }
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *standardPath = @"/Library/MobileSubstrate/DynamicLibraries/libFLEX.dylib";
+        NSFileManager *disk = NSFileManager.defaultManager;
+
+        if ([disk fileExistsAtPath:standardPath]) {
+            void *handle = dlopen(standardPath.UTF8String, RTLD_LAZY);
+            if (!handle) {
+                Alert(@"Error", @(dlerror() ?: "nil error"));
+            }
+        }
+    });
 }
 
 %hook UIWindow
 - (BOOL)_shouldCreateContextAsSecure {
-    return [self isKindOfClass:%c(FLEXWindow)] ? YES : %orig;
+    return (initialized && [self isKindOfClass:FLXWindowClass()]) ? YES : %orig;
 }
 
 - (id)initWithFrame:(CGRect)frame {
     self = %orig(frame);
-    
-    SEL toggle = @selector(toggleExplorer);
-    SEL show = @selector(showExplorer);
-    
-    UILongPressGestureRecognizer *tap = [[UILongPressGestureRecognizer alloc] initWithTarget:manager action:show];
-    tap.minimumPressDuration = .5;
-    tap.numberOfTouchesRequired = 3;
-    
-    [self addGestureRecognizer:tap];
+
+    if (initialized) {
+        UILongPressGestureRecognizer *tap = [[UILongPressGestureRecognizer alloc] initWithTarget:manager action:show];
+        tap.minimumPressDuration = .5;
+        tap.numberOfTouchesRequired = 3;
+
+        [self addGestureRecognizer:tap];
+    }
     
     return self;
 }
@@ -53,7 +77,9 @@ static SEL show = nil;
 - (id)initWithFrame:(CGRect)frame {
     self = %orig;
     
-    [self addGestureRecognizer:[[UILongPressGestureRecognizer alloc] initWithTarget:manager action:show]];
+    if (initialized) {
+        [self addGestureRecognizer:[[UILongPressGestureRecognizer alloc] initWithTarget:manager action:show]];
+    }
     
     return self;
 }

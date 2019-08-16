@@ -1,9 +1,9 @@
-export ARCHS = armv7s arm64 arm64e
+export ARCHS = arm64 #armv7s arm64e
 export TARGET = iphone:latest:9.0
 include $(THEOS)/makefiles/common.mk
 
 # FULL PATH of the FLEX repo on your own machine
-FLEX_ROOT = ./FLEX
+FLEX_ROOT = FLEX
 
 # Function to convert /foo/bar to -I/foo/bar
 dtoim = $(foreach d,$(1),-I$(d))
@@ -22,7 +22,10 @@ libFLEX_FRAMEWORKS = CoreGraphics UIKit ImageIO QuartzCore
 libFLEX_LIBRARIES = sqlite3 z
 libFLEX_CFLAGS += -fobjc-arc -w $(IMPORTS)
 
-include $(THEOS_MAKE_PATH)/library.mk
+include $(THEOS_MAKE_PATH)/tweak.mk
 
 before-stage::
 	find . -name ".DS_Store" -delete
+
+# For printing variables from the makefile
+print-%  : ; @echo $* = $($*)

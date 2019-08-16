@@ -8,9 +8,8 @@
 
 #pragma mark Imports
 
-#import "libflex/libFLEX.h"
 #import <Foundation/Foundation.h>
-
+#include <dlfcn.h>
 
 #pragma mark Macros
 

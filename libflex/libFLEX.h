@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "FLEXManager.h"
 
-Class FLXGetManagerClass();
+id FLXGetManager();
+SEL FLXRevealSEL();
+Class FLXWindowClass();

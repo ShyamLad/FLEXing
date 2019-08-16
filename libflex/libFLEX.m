@@ -7,7 +7,17 @@
 //
 
 #import "libFLEX.h"
+#import "FLEXWindow.h"
+#import "FLEXManager.h"
 
-Class FLXGetManagerClass() {
-	return [FLEXManager class];
+id FLXGetManager() {
+	return [YEETManager sharedManager];
+}
+
+SEL FLXRevealSEL() {
+	return @selector(showExplorer);
+}
+
+Class FLXWindowClass() {
+	return [FLEXWindow class];
 }
