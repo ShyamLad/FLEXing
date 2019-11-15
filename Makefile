@@ -1,9 +1,9 @@
-export ARCHS = armv7s arm64 arm64e
-export TARGET = iphone:9.0:9.0
+export ARCHS = arm64 arm64e
+export TARGET = iphone:13.2:13.2
 include $(THEOS)/makefiles/common.mk
 
 # FULL PATH of the FLEX repo on your own machine
-FLEX_ROOT = /Users/tanner/Repos/FLEX
+FLEX_ROOT = ./
 
 # Function to convert /foo/bar to -I/foo/bar
 dtoim = $(foreach d,$(1),-I$(d))
@@ -17,7 +17,7 @@ _IMPORTS += $(shell /bin/ls -d $(FLEX_ROOT)/Classes/*/*/)
 IMPORTS = -I$(FLEX_ROOT)/Classes/ $(call dtoim, $(_IMPORTS))
 
 TWEAK_NAME = FLEXing
-FLEXing_FRAMEWORKS = CoreGraphics UIKit ImageIO QuartzCore
+FLEXing_FRAMEWORKS = CoreGraphics UIKit ImageIO QuartzCore Foundation
 FLEXing_FILES = Tweak.xm $(SOURCES)
 FLEXing_LIBRARIES = sqlite3 z #objcipc #activator
 FLEXing_CFLAGS += -fobjc-arc -w $(IMPORTS)
@@ -32,4 +32,3 @@ after-install::
 
 # For printing variables from the makefile
 print-%  : ; @echo $* = $($*)
-

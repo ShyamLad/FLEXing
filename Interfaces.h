@@ -10,7 +10,6 @@
 
 #import "FLEXManager.h"
 #import <libactivator/libactivator.h>
-#import <objcipc/objcipc.h>
 
 
 #pragma mark Macros
@@ -28,6 +27,8 @@ otherButtonTitles:nil] show]
 
 static NSString * const kFLEXingShow   = @"com.pantsthief.flexing.show";
 static NSString * const kFLEXingToggle = @"com.pantsthief.flexing.toggle";
+const NSAttributedStringKey NSForegroundColorAttributeName = NULL;
+const UIFontWeight UIFontWeightSemibold = NULL;
 
 
 @interface UIStatusBarWindow : UIWindow @end
